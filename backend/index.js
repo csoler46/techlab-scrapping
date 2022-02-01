@@ -29,7 +29,8 @@ app.get("/locations-corendon", async (req, res, next) => {
     console.log(json)
 
     res.setHeader("Content-Type", "application/json");
-    res.send(json);
+    const locations = await corendon()
+    res.send(locations);
 })
 
 async function corendon() {
@@ -39,14 +40,13 @@ async function corendon() {
         const $ = await cheerio.load(json);
         const countries = []
         $('#filter-favorites').find('li').each((index, element) => {
-            const countryLabel = $(element).find('.cor-filter__label').text()
-            const countryCount = $(element).find('.cor-filter__count').text()
+            const countryLabel = $(element).find('.cor-filter__label').text().trim();
+            const countryCount = $(element).find('.cor-filter__count').text().trim().slice(1,-1);
             countries.push({countryLabel, countryCount}) 
         })
         return countries;
     } catch(err) {
         console.error(err);
     }
+    
 }
-
-corendon()
