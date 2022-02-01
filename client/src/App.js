@@ -3,28 +3,32 @@ import './App.css';
 
 function App() {
 
-  const options = [
-    { label: 'Amsterdam', value: 'amsterdam' },
-    { label: 'Eindhoven', value: 'eindhoven' },
-    { label: 'Rotterdam', value: 'rotterdam' },
-  ];
-
   const [location, setLocation] = React.useState(null);
+  const [locations, setLocations] = React.useState([]);
 
   const handleChange = (event) => {
     setLocation(event.target.value);
   };
 
   useEffect(() => {
-    
-  })
+    fetch('http://localhost:4000/locations-corendon')
+      .then(results => results.json())
+      .then(data => {
+        const locationsArray = []
+        data.map((item) => {
+          locationsArray.push({label: item.name , value: item.name.toLowerCase()})
+        })
+        setLocations(locationsArray)
+      });
+  }, [locations]); 
+
 
   return (
     <div className="App">
       <h2 className="text-7xl font-bold mt-20">Tour Operator comparator</h2>
       <h1 className="text-4xl mt-5 text-gray-500">Sunweb vs Corendon</h1>
       <Dropdown
-        options={options}
+        options={locations}
         value={location}
         onChange={handleChange}
       />
