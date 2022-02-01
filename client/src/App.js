@@ -5,9 +5,16 @@ function App() {
 
   const [location, setLocation] = React.useState(null);
   const [locations, setLocations] = React.useState([]);
+  const [corendonResult, setCorendonResult] = React.useState(null);
 
   const handleChange = (event) => {
-    setLocation(event.target.value);
+    const name = event.target.value;
+    setLocation(name);
+    fetch(`http://localhost:4000/filters-corendon/${name}`)
+    .then(results => results.json())
+    .then(data => {
+      setCorendonResult(data);
+    });
   };
 
   useEffect(() => {
@@ -16,11 +23,15 @@ function App() {
       .then(data => {
         const locationsArray = []
         data.map((item) => {
-          locationsArray.push({label: item.name , value: item.name.toLowerCase()})
+          locationsArray.push({label: item.countryLabel , value: item.countryLabel.toLowerCase()})
         })
-        setLocations(locationsArray)
+        setLocations({
+          ...locations,
+          corendon: locationsArray
+        });
       });
-  }, [locations]); 
+
+  }, []); 
 
 
   return (
@@ -28,10 +39,13 @@ function App() {
       <h2 className="text-7xl font-bold mt-20">Tour Operator comparator</h2>
       <h1 className="text-4xl mt-5 text-gray-500">Sunweb vs Corendon</h1>
       <Dropdown
-        options={locations}
+        options={locations.corendon || []}
         value={location}
         onChange={handleChange}
       />
+      {corendonResult && corendonResult.map((acco, index) => (
+        <div key={index}>{acco.name}  {acco.price}€</div>
+      ))}
     </div>
   );
 }
@@ -41,8 +55,8 @@ const Dropdown = ({ value, options, onChange }) => {
         <div className="inline-block relative w-64">
           <select className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline mt-10" value= {value ? value : undefined} onChange={onChange} defaultValue="location">
             <option disabled value="location">Location</option>
-            {options.map((option) => (
-              <option value={option.value} key={`${Math.floor((Math.random() * 1000))}-min`}>{option.label}</option>
+            {options.map((option, index) => (
+              <option value={option.value} key={index}>{option.label}</option>
             ))}
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 mt-10">
